@@ -38,21 +38,24 @@ jobs:
         run: cargo install cargo-generate --locked
 
       - name: Create output directory
+        if: runner.os != 'Windows'
         run: mkdir -p output
-        if: matrix.os != 'windows-latest'
 
       - name: Create output directory
+        if: runner.os == 'Windows'
         shell: pwsh
         run: New-Item -Path output -ItemType Directory
-        if: matrix.os == 'windows-latest'
 
-      - name: Copy binary to output
+      - name: Copy binary to output (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: cp $HOME/.cargo/bin/cargo-generate output/
+
+      - name: Copy binary to output (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            cp $USERPROFILE/.cargo/bin/cargo-generate.exe output/
-          else
-            cp $HOME/.cargo/bin/cargo-generate output/
-          fi
+          $source = "$env:USERPROFILE\.cargo\bin\cargo-generate.exe"
+          Copy-Item $source -Destination output/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
