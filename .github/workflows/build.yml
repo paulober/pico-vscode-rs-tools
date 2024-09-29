@@ -1,0 +1,55 @@
+name: Build and Upload Cargo Generate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    name: Build Cargo Generate Binary
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        arch: [x86_64, aarch64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y pkg-config libssl-dev
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            brew install openssl
+          fi
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install cargo-generate
+        run: cargo install cargo-generate --locked
+
+      - name: Create output directory
+        run: mkdir -p output
+
+      - name: Copy binary to output
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            cp $USERPROFILE/.cargo/bin/cargo-generate.exe output/
+          else
+            cp $HOME/.cargo/bin/cargo-generate output/
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: cargo-generate-${{ matrix.os }}-${{ matrix.arch }}
+          path: output/
