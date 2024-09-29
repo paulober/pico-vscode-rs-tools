@@ -59,6 +59,7 @@ jobs:
           $source = "$env:USERPROFILE\.cargo\bin\cargo-generate.exe"
           Copy-Item $source -Destination output/
 
+      # TODO: zip drops chmod+x??
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
