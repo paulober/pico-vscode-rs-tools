@@ -48,7 +48,9 @@ jobs:
 
       - name: Copy binary to output (Linux/macOS)
         if: runner.os != 'Windows'
-        run: cp $HOME/.cargo/bin/cargo-generate output/
+        run: |
+            cp $HOME/.cargo/bin/cargo-generate output/
+            chmod +x output/cargo-generate
 
       - name: Copy binary to output (Windows)
         if: runner.os == 'Windows'
